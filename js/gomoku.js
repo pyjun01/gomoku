@@ -16,11 +16,11 @@ class Gomoku {
     this.turn= false;
     this.tg= this.player[+this.turn];
     this.list= [];
-    
     this.eve();
     setInterval(e =>{
       this.render();
     }, 1000/30);
+    this.tg.prov= 112;
   }
   onClick (e){
     let Cpos= {
@@ -45,26 +45,28 @@ class Gomoku {
     if((Spos.x!=null && Spos.y!=null) && (Math.hypot(Cpos.x-Spos.x*this.block, Cpos.y-Spos.y*this.block)<this.stone)){
       console.log('ok');
       if(this.tg.prov && this.tg.prov == Spos.x+Spos.y*15){
-        this.list.push(Spos.x+Spos.y*15);
-        this.tg.items.push(Spos.x+Spos.y*15);
-        this.tg.prov= null;
-        this.turn= !this.turn;
-        this.tg= this.player[+this.turn];
+        this.put(Spos.x+Spos.y*15);
         return;
       }
-      console.log(Spos.x+Spos.y*15);
       this.player[+this.turn].prov= Spos.x+Spos.y*15;
     }
+  }
+  put (l){
+    this.list.push(l);
+    this.tg.items.push(l);
+    this.tg.prov= null;
+    this.turn= !this.turn;
+    this.tg= this.player[+this.turn];
+    let i= 0;
+    while(this.list.includes(i)){
+      i++;
+    }
+    this.tg.prov= i;
   }
   onKeyup (e){ 
     switch(e.keyCode){
       case 32:
-        let item= this.player[+this.turn].prov;
-        this.list.push(item);
-        this.tg.items.push(item);
-        this.tg.prov= null;
-        this.turn= !this.turn;
-        this.tg= this.player[+this.turn];
+        this.put(this.player[+this.turn].prov);
         break;
       case 37:
         if(this.player[+this.turn].prov-1 >= 0 && this.list.find(f => f == this.player[+this.turn].prov-1) == null) this.player[+this.turn].prov--;
@@ -109,6 +111,16 @@ class Gomoku {
       this.ctx.lineTo(this.W-this.space, this.space+this.block*i);
       this.ctx.stroke();
     }
+    this.ctx.save();
+    this.ctx.fillStyle= "#000";
+    for(let i= 0; i<3; i++){
+      for(let j= 0; j<3; j++){
+        this.ctx.beginPath();
+        this.ctx.arc(this.space+this.block*(3+4*i), this.space+this.block*(3+4*j), 5, Math.PI*2, 0, false);
+        this.ctx.fill();
+      }
+    }
+    this.ctx.restore();
     this.player.forEach(v =>{
       v.render(this.ctx, this);
     });
