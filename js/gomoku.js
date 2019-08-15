@@ -51,39 +51,30 @@ class Gomoku {
       this.player[+this.turn].prov= Spos.x+Spos.y*15;
     }
   }
-  put (l){
-    this.list.push(l);
-    this.tg.items.push(l);
-    this.tg.prov= null;
-    this.turn= !this.turn;
-    this.tg= this.player[+this.turn];
-    let i= 0;
-    while(this.list.includes(i)){
-      i++;
-    }
-    this.tg.prov= i;
-  }
   onKeyup (e){ 
     switch(e.keyCode){
       case 32:
         this.put(this.player[+this.turn].prov);
         break;
       case 37:
-        if(this.player[+this.turn].prov-1 >= 0 && this.list.find(f => f == this.player[+this.turn].prov-1) == null) this.player[+this.turn].prov--;
+        if(this.player[+this.turn].prov-1 >= 0 && !this.list.includes(this.player[+this.turn].prov-1)) this.player[+this.turn].prov--;
         break;
       case 38:
-        if(this.player[+this.turn].prov-15 >= 0 && this.list.find(f => f == this.player[+this.turn].prov-15) == null) this.player[+this.turn].prov-=15;
+        if(this.player[+this.turn].prov-15 >= 0 && !this.list.includes(this.player[+this.turn].prov-15)) this.player[+this.turn].prov-=15;
         break;
       case 39:
-        if(this.player[+this.turn].prov+1 <= 224 && this.list.find(f => f == this.player[+this.turn].prov+1) == null) this.player[+this.turn].prov++;
+        if(this.player[+this.turn].prov+1 <= 224 && !this.list.includes(this.player[+this.turn].prov+1)) this.player[+this.turn].prov++;
         break;
       case 40:
-        if(this.player[+this.turn].prov+15 <= 224 && this.list.find(f => f == this.player[+this.turn].prov+15) == null) this.player[+this.turn].prov+= 15;
+        if(this.player[+this.turn].prov+15 <= 224 && !this.list.includes(this.player[+this.turn].prov+15)) this.player[+this.turn].prov+= 15;
         break;
     }
   }
   eve (){
-    this.canvas.addEventListener("click", this.onClick.bind(this));
+    this.onClick= this.onClick.bind(this);
+    this.onKeyup= this.onKeyup.bind(this);
+    this.canvas.addEventListener("click", this.onClick);
+    window.addEventListener("keyup", this.onKeyup);
     window.addEventListener("resize", e =>{
       let min= Math.min(window.innerWidth, window.innerHeight);
       this.canvas.width= this.W= min/100*85;
@@ -92,7 +83,79 @@ class Gomoku {
       this.block= this.W/100*92/14;
       this.stone= this.block/100*40;
     });
-    window.addEventListener("keyup", this.onKeyup.bind(this));
+  }
+  put (l){
+    this.list.push(l);
+    this.tg.items.push(l);
+    this.tg.prov= null;
+    if(this.isEnd()) return;
+    this.turn= !this.turn;
+    this.tg= this.player[+this.turn];
+    let i= 0;
+    while(this.list.includes(i)){
+      i++;
+    }
+    this.tg.prov= i;
+  }
+  Find (v, arr, num){
+    if(num == 4) return true;
+    if(v && arr.includes(v+16)){
+      v+= 16; 
+    }else{
+      return false;
+    }
+    this.Find(v, arr, num+1);
+  }
+  isEnd (){
+    let sort= this.tg.items.sort();
+    let stack= 0;
+    for(let i= 1, len= sort.length; i<len; i++){
+      if(sort[i] != null && sort[i-1] != null && sort[i]-sort[i-1] == 1 ){
+        stack++;
+      }else{
+        stack= 0;
+      }
+      if(stack == 4){ 
+        this.end();
+        return true;
+      }
+    }
+    stack= 0;
+    for(let i= 0, len= sort.length; i<len; i++){
+      for(let j= 1; j<=4; j++){
+        if(sort.includes(sort[i]+j*16)){
+          stack++;
+        }else{
+          stack= 0;
+          break;
+        }
+      }
+      if(stack == 4){
+        this.end();
+        return true;
+      }
+    }
+    stack= 0;
+    for(let i= 0, len= sort.length; i<len; i++){
+      for(let j= 1; j<=4; j++){
+        if(sort.includes(sort[i]+j*14)){
+          stack++;
+        }else{
+          stack= 0;
+          break;
+        }
+      }
+      if(stack == 4){
+        this.end();
+        return true;
+      }
+    }
+    return false;
+  }
+  end (){
+    console.log('end');
+    this.canvas.removeEventListener("click", this.onClick);
+    window.removeEventListener("keyup", this.onKeyup);
   }
   render (){
     this.ctx.clearRect(0, 0, this.W, this.H);
