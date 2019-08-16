@@ -2,9 +2,6 @@ class Gomoku {
   constructor (){
     this.canvas= document.querySelector("canvas");
     this.ctx= this.canvas.getContext("2d");
-    this.ctx.textAlign= "center";
-    this.ctx.textBaseline= "middle";
-    this.ctx.font= "16px sans-serif";
     let min= Math.min(window.innerWidth, window.innerHeight);
     this.canvas.width= this.W= min/100*85;
     this.canvas.height= this.H= min/100*85;
@@ -51,7 +48,7 @@ class Gomoku {
       this.player[+this.turn].prov= Spos.x+Spos.y*15;
     }
   }
-  onKeyup (e){ 
+  onKeydown (e){ 
     switch(e.keyCode){
       case 32:
         this.put(this.player[+this.turn].prov);
@@ -72,9 +69,9 @@ class Gomoku {
   }
   eve (){
     this.onClick= this.onClick.bind(this);
-    this.onKeyup= this.onKeyup.bind(this);
+    this.onKeydown= this.onKeydown.bind(this);
     this.canvas.addEventListener("click", this.onClick);
-    window.addEventListener("keyup", this.onKeyup);
+    window.addEventListener("keydown", this.onKeydown);
     window.addEventListener("resize", e =>{
       let min= Math.min(window.innerWidth, window.innerHeight);
       this.canvas.width= this.W= min/100*85;
@@ -88,6 +85,7 @@ class Gomoku {
     this.list.push(l);
     this.tg.items.push(l);
     this.tg.prov= null;
+    console.log(this.tg.items);
     if(this.isEnd()) return;
     this.turn= !this.turn;
     this.tg= this.player[+this.turn];
@@ -97,20 +95,11 @@ class Gomoku {
     }
     this.tg.prov= i;
   }
-  Find (v, arr, num){
-    if(num == 4) return true;
-    if(v && arr.includes(v+16)){
-      v+= 16; 
-    }else{
-      return false;
-    }
-    this.Find(v, arr, num+1);
-  }
   isEnd (){
-    let sort= this.tg.items.sort();
+    let sort= [...this.tg.items].sort();
 
     for(let i= 1, stack= 0, len= sort.length; i<len; i++){
-      if(sort[i] != null && sort[i-1] != null && sort[i]-sort[i-1] == 1 ){
+      if(sort[i] != null && sort[i-1] != null && sort[i]-sort[i-1] == 1 && sort[i]%15 != 0 && sort[i]-15%14 != 0){
         stack++;
       }else{
         stack= 0;
@@ -120,15 +109,20 @@ class Gomoku {
         return true;
       }
     }
-    for(let k= 0; k<3; k++){
-      for(let i= 0, stack= 0, len= sort.length; i<len; i++){
+    for(let k= 0, stack= 0; k<3; k++){
+      for(let i= 0, len= sort.length; i<len; i++){
+        stack= 0;
         for(let j= 1; j<=4; j++){
+          if(k == 0 && sort[i]%15 == 0) break;
+          if(k == 2 && (sort[i]-14)%15 == 0) break;
           if(sort.includes(sort[i]+j*(14+k))){
             stack++;
           }else{
             stack= 0;
             break;
           }
+          if(k == 0 && (sort[i]+j*(14+k))%15 == 0) break;
+          if(k == 2 && (sort[i]+j*(14+k)-14)%15 == 0) break;
         }
         if(stack == 4){
           this.end();
@@ -141,7 +135,7 @@ class Gomoku {
   end (){
     console.log('end');
     this.canvas.removeEventListener("click", this.onClick);
-    window.removeEventListener("keyup", this.onKeyup);
+    window.removeEventListener("keydown", this.onKeydown);
   }
   render (){
     this.ctx.clearRect(0, 0, this.W, this.H);
@@ -180,6 +174,8 @@ class Player {
      this.items= [];
      this.isBlack= isBlack;
      this.color= isBlack? "rgb(0, 0, 0)": "rgb(255, 255, 255)";
+     this.text_c= isBlack? "rgb(255, 255, 255)": "rgb(0, 0, 0)";
+     this.expression= n => n*2+(isBlack? 1: 2);
      this.prov_c= this.color.replace(/rgb\((.+)\)/, "rgba($1, 0.7)");
   }
   render (ctx, gomoku){
@@ -191,13 +187,20 @@ class Player {
       ctx.fill();
       ctx.restore();
     }
-    this.items.forEach(v =>{
-      ctx.save();
+    ctx.save();
+    ctx.textAlign= "center";
+    ctx.textBaseline= "middle";
+    ctx.font= "16px sans-serif";
+    this.items.forEach((v, n) =>{
       ctx.beginPath();
       ctx.fillStyle= this.color;
       ctx.arc(v%15*gomoku.block+gomoku.space, Math.floor(v/15)*gomoku.block+gomoku.space, gomoku.stone, Math.PI*2, 0, false);
       ctx.fill();
+      ctx.beginPath();
+      ctx.fillStyle= this.text_c;
+      ctx.fillText(this.expression(n), v%15*gomoku.block+gomoku.space, Math.floor(v/15)*gomoku.block+gomoku.space);
     });
+    ctx.restore();
   }
 }
 window.onload= e =>{
