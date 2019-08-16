@@ -108,8 +108,8 @@ class Gomoku {
   }
   isEnd (){
     let sort= this.tg.items.sort();
-    let stack= 0;
-    for(let i= 1, len= sort.length; i<len; i++){
+
+    for(let i= 1, stack= 0, len= sort.length; i<len; i++){
       if(sort[i] != null && sort[i-1] != null && sort[i]-sort[i-1] == 1 ){
         stack++;
       }else{
@@ -120,34 +120,20 @@ class Gomoku {
         return true;
       }
     }
-    stack= 0;
-    for(let i= 0, len= sort.length; i<len; i++){
-      for(let j= 1; j<=4; j++){
-        if(sort.includes(sort[i]+j*16)){
-          stack++;
-        }else{
-          stack= 0;
-          break;
+    for(let k= 0; k<3; k++){
+      for(let i= 0, stack= 0, len= sort.length; i<len; i++){
+        for(let j= 1; j<=4; j++){
+          if(sort.includes(sort[i]+j*(14+k))){
+            stack++;
+          }else{
+            stack= 0;
+            break;
+          }
         }
-      }
-      if(stack == 4){
-        this.end();
-        return true;
-      }
-    }
-    stack= 0;
-    for(let i= 0, len= sort.length; i<len; i++){
-      for(let j= 1; j<=4; j++){
-        if(sort.includes(sort[i]+j*14)){
-          stack++;
-        }else{
-          stack= 0;
-          break;
+        if(stack == 4){
+          this.end();
+          return true;
         }
-      }
-      if(stack == 4){
-        this.end();
-        return true;
       }
     }
     return false;
