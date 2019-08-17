@@ -38,32 +38,31 @@ class Gomoku {
       }
     }
     if(this.list.includes(Spos.x+Spos.y*15)) return console.log('already');
-
+    console.log(Spos.x+Spos.y*15, this.tg.prov);
     if((Spos.x!=null && Spos.y!=null) && (Math.hypot(Cpos.x-Spos.x*this.block, Cpos.y-Spos.y*this.block)<this.stone)){
-      console.log('ok');
-      if(this.tg.prov && this.tg.prov == Spos.x+Spos.y*15){
+      if(this.tg.prov == Spos.x+Spos.y*15){
         this.put(Spos.x+Spos.y*15);
         return;
       }
-      this.player[+this.turn].prov= Spos.x+Spos.y*15;
+      this.tg.prov= Spos.x+Spos.y*15;
     }
   }
   onKeydown (e){ 
     switch(e.keyCode){
       case 32:
-        this.put(this.player[+this.turn].prov);
+        this.put(this.tg.prov);
         break;
       case 37:
-        if(this.player[+this.turn].prov-1 >= 0 && !this.list.includes(this.player[+this.turn].prov-1)) this.player[+this.turn].prov--;
+        if(this.tg.prov-1 >= 0 && !this.list.includes(this.tg.prov-1)) this.tg.prov--;
         break;
       case 38:
-        if(this.player[+this.turn].prov-15 >= 0 && !this.list.includes(this.player[+this.turn].prov-15)) this.player[+this.turn].prov-=15;
+        if(this.tg.prov-15 >= 0 && !this.list.includes(this.tg.prov-15)) this.tg.prov-=15;
         break;
       case 39:
-        if(this.player[+this.turn].prov+1 <= 224 && !this.list.includes(this.player[+this.turn].prov+1)) this.player[+this.turn].prov++;
+        if(this.tg.prov+1 <= 224 && !this.list.includes(this.tg.prov+1)) this.tg.prov++;
         break;
       case 40:
-        if(this.player[+this.turn].prov+15 <= 224 && !this.list.includes(this.player[+this.turn].prov+15)) this.player[+this.turn].prov+= 15;
+        if(this.tg.prov+15 <= 224 && !this.list.includes(this.tg.prov+15)) this.tg.prov+= 15;
         break;
     }
   }
@@ -81,11 +80,56 @@ class Gomoku {
       this.stone= this.block/100*40;
     });
   }
+  Checkrule (now){
+    let items= [...this.list].sort();
+    let cnt= 0;
+    for(let i= 0; i<3; i++){
+      for(let j= 0; j<3; j++){
+        if((i == 0 && now%15 == 0) && j != 2) continue;
+        if((i == 2 && (now-14)%15 == 0) && j != 2) continue;
+        let num= [
+          now+(-14-i)*(3-j), 
+          now+(-14-i)*(2-j-(Math.floor(j/2))), 
+          now+(-14-i)*(1-j-(Math.ceil(j/2))), 
+          now+(-14-i)*(-1-j)
+        ];
+        console.log(num);
+        console.log(num.map(v => Math.floor(v/15)));
+        if( 
+          (!items.includes(num[0]) && 
+          items.includes(num[1]) && 
+          items.includes(num[2]) && 
+          !items.includes(num[3])) && 
+          (num.map(v => Math.floor(v/15)).some((v, n) => ))
+        ){
+          cnt++;
+          break;
+        }
+      }
+    }
+    for(let i= 0; i<3; i++){
+      if(
+        !items.includes(now-3+i) && 
+        items.includes(now-2+i+Math.floor(i/2)) && 
+        items.includes(now-1+i+Math.ceil(i/2)) && 
+        !items.includes(now+1+i)
+      ){
+        cnt++;
+        break;
+      }
+    }
+    
+    console.log(items, now);
+    console.log(cnt);
+    return cnt >= 2;
+  }
   put (l){
+    if(!this.turn && this.Checkrule(l)){
+      return;
+    }
     this.list.push(l);
     this.tg.items.push(l);
     this.tg.prov= null;
-    console.log(this.tg.items);
     if(this.isEnd()) return;
     this.turn= !this.turn;
     this.tg= this.player[+this.turn];
@@ -99,7 +143,7 @@ class Gomoku {
     let sort= [...this.tg.items].sort();
 
     for(let i= 1, stack= 0, len= sort.length; i<len; i++){
-      if(sort[i] != null && sort[i-1] != null && sort[i]-sort[i-1] == 1 && sort[i]%15 != 0 && sort[i]-15%14 != 0){
+      if(sort[i] != null && sort[i-1] != null && sort[i]-sort[i-1] == 1 && sort[i]%15 != 0 && (sort[i]-14)%15 != 0){
         stack++;
       }else{
         stack= 0;
