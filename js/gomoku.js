@@ -85,22 +85,24 @@ class Gomoku {
     let cnt= 0;
     for(let i= 0; i<3; i++){
       for(let j= 0; j<3; j++){
-        if((i == 0 && now%15 == 0) && j != 2) continue;
-        if((i == 2 && (now-14)%15 == 0) && j != 2) continue;
+        // if((i == 0 && now%15 == 0 && now < 15) && j != 2) continue;
+        // if((i == 2 && (now-14)%15 == 0) && j != 2) continue;
         let num= [
           now+(-14-i)*(3-j), 
           now+(-14-i)*(2-j-(Math.floor(j/2))), 
           now+(-14-i)*(1-j-(Math.ceil(j/2))), 
+          now,
           now+(-14-i)*(-1-j)
         ];
-        console.log(num);
-        console.log(num.map(v => Math.floor(v/15)));
+        let arr= num.map(v => Math.floor(v/15));
         if( 
           (!items.includes(num[0]) && 
           items.includes(num[1]) && 
           items.includes(num[2]) && 
-          !items.includes(num[3])) && 
-          (num.map(v => Math.floor(v/15)).some((v, n) => ))
+          !items.includes(num[4])) &&
+          !(arr.some( (v,n) =>{
+            if(n != 0 && v-arr[n-1] != 1) return true;
+          }))
         ){
           cnt++;
           break;
@@ -112,14 +114,13 @@ class Gomoku {
         !items.includes(now-3+i) && 
         items.includes(now-2+i+Math.floor(i/2)) && 
         items.includes(now-1+i+Math.ceil(i/2)) && 
-        !items.includes(now+1+i)
+        !items.includes(now+1+i) &&
+        ([...new Set( [now-3+i, now-2+i+Math.floor(i/2), now-1+i+Math.ceil(i/2), now+1+i].map(v => Math.floor(v/15)) )].length == 1)
       ){
         cnt++;
         break;
       }
     }
-    
-    console.log(items, now);
     console.log(cnt);
     return cnt >= 2;
   }
