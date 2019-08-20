@@ -6,14 +6,15 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>오목</title>
   <style>
-    *{margin: 0;padding: 0;box-sizing: border-box;}
+    *{margin: 0;padding: 0;box-sizing: border-box;user-select: none;font-family: sans-serif;}
     html, body{width: 100%;height: 100%;display:flex;justify-content: center;align-items: center;}
-    body{background: #eee;}
-    canvas{background: #fff;}
+    body{background: #eee;flex-direction: column;}
+    button{display: none;padding: 10px 13px;font-size: 14px;background: #24292e;color: #fff;border-radius: 5px;border: 1px solid #000;position: absolute;bottom: 5%;}
   </style>
 </head>
 <body>
   <canvas id="canvas" width="760" height="760"></canvas>
+  <button>다시하기</button>
   <script src="js/gomoku.js"></script>
 </body>
 </html>

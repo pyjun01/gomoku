@@ -1,3 +1,4 @@
+let gomoku;
 class Gomoku {
   constructor (){
     this.canvas= document.querySelector("canvas");
@@ -13,8 +14,9 @@ class Gomoku {
     this.turn= false;
     this.tg= this.player[+this.turn];
     this.list= [];
+    document.querySelector("button").style.display= "none";
     this.eve();
-    setInterval(e =>{
+    this.interval= setInterval(e =>{
       this.render();
     }, 1000/30);
     this.tg.prov= 112;
@@ -66,27 +68,40 @@ class Gomoku {
         break;
     }
   }
+  onResize (e){
+    let min= Math.min(window.innerWidth, window.innerHeight);
+    this.canvas.width= this.W= min/100*85;
+    this.canvas.height= this.H= min/100*85;
+    this.space= this.W/100*4;
+    this.block= this.W/100*92/14;
+    this.stone= this.block/100*40;
+  }
+  onReset (e){
+    this.player=[ new Player(true), new Player(false) ];
+    this.turn= false;
+    this.tg= this.player[+this.turn];
+    this.list= [];
+    this.tg.prov= 112;
+    this.canvas.addEventListener("click", this.onClick);
+    window.addEventListener("keydown", this.onKeydown);
+    document.querySelector("button").style.display= "none";
+  }
   eve (){
     this.onClick= this.onClick.bind(this);
     this.onKeydown= this.onKeydown.bind(this);
+    this.onResize= this.onResize.bind(this);
+
     this.canvas.addEventListener("click", this.onClick);
     window.addEventListener("keydown", this.onKeydown);
-    window.addEventListener("resize", e =>{
-      let min= Math.min(window.innerWidth, window.innerHeight);
-      this.canvas.width= this.W= min/100*85;
-      this.canvas.height= this.H= min/100*85;
-      this.space= this.W/100*4;
-      this.block= this.W/100*92/14;
-      this.stone= this.block/100*40;
-    });
+    window.addEventListener("resize", this.onResize);
+
+    document.querySelector("button").onclick= this.onReset.bind(this);
   }
   Checkrule (now){
     let items= [...this.list].sort();
     let cnt= 0;
     for(let i= 0; i<3; i++){
       for(let j= 0; j<3; j++){
-        // if((i == 0 && now%15 == 0 && now < 15) && j != 2) continue;
-        // if((i == 2 && (now-14)%15 == 0) && j != 2) continue;
         let num= [
           now+(-14-i)*(3-j), 
           now+(-14-i)*(2-j-(Math.floor(j/2))), 
@@ -102,7 +117,8 @@ class Gomoku {
           !items.includes(num[4])) &&
           !(arr.some( (v,n) =>{
             if(n != 0 && v-arr[n-1] != 1) return true;
-          }))
+          })) &&
+          !Math.min.apply(null, num) < 0
         ){
           cnt++;
           break;
@@ -178,7 +194,7 @@ class Gomoku {
     return false;
   }
   end (){
-    console.log('end');
+    document.querySelector("button").style.display= "block";
     this.canvas.removeEventListener("click", this.onClick);
     window.removeEventListener("keydown", this.onKeydown);
   }
@@ -249,5 +265,5 @@ class Player {
   }
 }
 window.onload= e =>{
-  new Gomoku();
+  gomoku= new Gomoku();
 }
