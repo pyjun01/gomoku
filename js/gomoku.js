@@ -11,6 +11,73 @@ class Gomoku {
     this.stone= this.block/100*40;
 
     this.player=[ new Player(true), new Player(false) ];
+    this.first();
+  }
+  first (){
+    this.board();
+    [82, 81, 80, 96, 66, 50, 52, 94, 38, 24, 67, 97, 98, 49, 82, 64, 114, 130, 82, 68, 82, 22, 82, 93, 82].forEach((v, n) =>{
+      this.ctx.beginPath();
+      this.ctx.fillStyle= !(n%2)? "#000": "#fff";
+      this.ctx.arc(v%15*this.block+this.space, Math.floor(v/15)*this.block+this.space, this.stone, Math.PI*2, 0, false);
+      this.ctx.fill();
+    });
+    [23, 37, 51, 65, 79].forEach(v =>{
+      this.ctx.beginPath();
+      this.ctx.fillStyle= "#04090e";
+      this.ctx.arc(v%15*this.block+this.space, Math.floor(v/15)*this.block+this.space, this.stone+1, Math.PI*2, 0, false);
+      this.ctx.fill();
+      this.ctx.fillStyle= "#ffdf00";
+      this.ctx.arc(v%15*this.block+this.space, Math.floor(v/15)*this.block+this.space, this.stone-2, Math.PI*2, 0, true);
+      this.ctx.fill();
+    });
+    this.ctx.restore();
+    this.ctx.font= "bold 56px sans-serif";
+    this.ctx.textAlign= "center";
+    this.ctx.fillStyle= "#fff";
+    this.ctx.fillText("Gomoku", this.W/2, this.H-300);
+
+
+    this.btns= [new Path2D(), new Path2D()];
+    this.btns[0].rect( this.W/2-50, this.H-240, -100, 50);
+    this.btns[1].rect( this.W/2+50, this.H-240, 100, 50);
+    this.ctx.fillStyle= " #24292e";
+    this.btns.forEach((v, n) =>{
+      this.ctx.fill(v);
+    })
+    this.ctx.font= "14px sans-serif";
+    this.ctx.textBaseline= "middle";
+    this.ctx.fillStyle= " #fff";
+    this.ctx.fillText("혼자하기", this.W/2-100, this.H-215);
+    this.ctx.fillText("vs Bot", this.W/2+100, this.H-215);
+    window.onmousemove= e =>{
+      let pos= {
+        x: e.pageX - this.canvas.offsetLeft,
+        y: e.pageY - this.canvas.offsetTop,
+      };
+      this.canvas.style.cursor= "default";
+      this.btns.forEach(v =>{
+        if(this.ctx.isPointInPath(v, pos.x, pos.y)){
+          this.canvas.style.cursor= "pointer";
+        }
+      });
+    }
+    this.canvas.onclick= e =>{
+      let pos= {
+        x: e.pageX - this.canvas.offsetLeft,
+        y: e.pageY - this.canvas.offsetTop,
+      };
+      this.btns.forEach(v =>{
+        if(this.ctx.isPointInPath(v, pos.x, pos.y)){
+          this.canvas.style.cursor= "default";
+          window.onmousemove= null;
+          this.canvas.onclick= null;
+          this.start();
+        }
+      });
+    }
+    
+  }
+  start (){
     this.turn= false;
     this.tg= this.player[+this.turn];
     this.list= [];
@@ -198,8 +265,7 @@ class Gomoku {
     this.canvas.removeEventListener("click", this.onClick);
     window.removeEventListener("keydown", this.onKeydown);
   }
-  render (){
-    this.ctx.clearRect(0, 0, this.W, this.H);
+  board (){
     this.ctx.fillStyle= "#dcb35b";
     this.ctx.fillRect(0, 0, this.W, this.H);
     this.ctx.lineWidth= 2;
@@ -215,6 +281,10 @@ class Gomoku {
       this.ctx.lineTo(this.W-this.space, this.space+this.block*i);
       this.ctx.stroke();
     }
+  }
+  render (){
+    this.ctx.clearRect(0, 0, this.W, this.H);
+    this.board();
     this.ctx.save();
     this.ctx.fillStyle= "#000";
     for(let i= 0; i<3; i++){
