@@ -11,9 +11,9 @@ class Gomoku {
     this.stone= this.block/100*40;
 
     this.player=[ new Player(true), new Player(false) ];
-    this.first();
+    this.init();
   }
-  first (){
+  init (){
     this.board();
     [82, 81, 80, 96, 66, 50, 52, 94, 38, 24, 67, 97, 98, 49, 82, 64, 114, 130, 82, 68, 82, 22, 82, 93, 82].forEach((v, n) =>{
       this.ctx.beginPath();
@@ -66,12 +66,16 @@ class Gomoku {
         x: e.pageX - this.canvas.offsetLeft,
         y: e.pageY - this.canvas.offsetTop,
       };
-      this.btns.forEach(v =>{
+      this.btns.forEach((v, n) =>{
         if(this.ctx.isPointInPath(v, pos.x, pos.y)){
           this.canvas.style.cursor= "default";
           window.onmousemove= null;
           this.canvas.onclick= null;
-          this.start();
+          if(n){
+
+          }else{
+            this.start();
+          }
         }
       });
     }
